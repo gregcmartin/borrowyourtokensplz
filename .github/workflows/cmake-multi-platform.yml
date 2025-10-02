@@ -1,0 +1,52 @@
+name: Simple XTate Build
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Clone xtate repository
+      run: |
+        git clone https://github.com/babycoff/xtate.git
+        cd xtate
+        echo "Repository cloned successfully"
+        ls -la
+    
+    - name: Install Clang and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang \
+          build-essential \
+          cmake \
+          pkg-config \
+          libpcap-dev \
+          libssl-dev \
+          libpcre2-dev \
+          libxml2-dev \
+          liblua5.3-dev \
+          libbson-dev \
+          libmongoc-dev
+    
+    - name: Set Clang as default compiler
+      run: |
+        export CC=clang
+        export CXX=clang++
+        echo "CC=clang" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
+    
+    - name: Build xtate
+      run: |
+        cd xtate
+        chmod +x build.sh
+        ./build.sh
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: xtate-build
+        path: xtate/

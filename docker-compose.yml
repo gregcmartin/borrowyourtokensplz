@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  xtate-scanner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: xtate-llm-scanner:latest
+    container_name: xtate-scanner
+
+    # Required for raw packet capture
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+    # Use host network for scanning
+    network_mode: host
+
+    # Optional: privileged mode if cap_add is insufficient
+    # privileged: true
+
+    # Mount volumes for persistent results
+    volumes:
+      - ./results:/xtate/results
+      - ./data:/xtate/data:ro
+
+    # Override to run as root (required for scanning)
+    user: root
+
+    # Keep container running for interactive use
+    stdin_open: true
+    tty: true
+
+    # Default command - override when running
+    command: /bin/bash
+
+    environment:
+      - SCAN_RATE=10000
+      - RESULTS_DIR=/xtate/results
+
+  # Alternative: One-shot scanner service
+  xtate-scan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: xtate-llm-scanner:latest
+    container_name: xtate-scan-oneshot
+
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+    network_mode: host
+
+    volumes:
+      - ./results:/xtate/results
+      - ./data:/xtate/data:ro
+
+    user: root
+
+    # Override with actual scan targets
+    # Example: docker-compose run xtate-scan 192.168.1.0/24
+    entrypoint: ["/xtate/scripts/scan-llm-services.sh", "-ip"]
+    command: ["--help"]
+
+    environment:
+      - SCAN_RATE=10000
+      - RESULTS_DIR=/xtate/results
+
+# Example usage:
+#
+# Build the image:
+#   docker-compose build
+#
+# Run interactive shell:
+#   docker-compose run --rm xtate-scanner
+#
+# Run a scan:
+#   docker-compose run --rm xtate-scan 192.168.1.0/24
+#
+# Run custom scan:
+#   docker-compose run --rm xtate-scanner xtate -ip 10.0.0.0/16 -p 11434 -scan zbanner -probe llm-inference
+#
+# Start persistent container:
+#   docker-compose up -d xtate-scanner
+#   docker exec -it xtate-scanner bash

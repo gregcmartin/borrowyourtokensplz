@@ -1,0 +1,58 @@
+name: Quick Build
+
+on:
+  push:
+    branches: [ "xtate" ]
+
+jobs:
+  quick-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout XTate repository
+      uses: actions/checkout@v4
+      with:
+        repository: babycoff/xtate
+        path: xtate
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang \
+          build-essential \
+          cmake \
+          pkg-config \
+          libpcap-dev \
+          libssl-dev \
+          libpcre2-dev \
+          libxml2-dev \
+          liblua5.3-dev \
+          libbson-dev \
+          libmongoc-dev
+
+    - name: Build
+      run: |
+        cd xtate
+        export CC=clang
+        export CXX=clang++
+        if [ -f "build.sh" ]; then
+          chmod +x build.sh
+          ./build.sh
+          cd build
+          chmod +x xtate
+          ./xtate --version
+        elif [ -f "CMakeLists.txt" ]; then
+          cmake -B build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+          cmake --build build
+        elif [ -f "Makefile" ]; then
+          make CC=clang CXX=clang++
+        fi
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: xtate-quick-build
+        path: xtate/
+        retention-days: 3
