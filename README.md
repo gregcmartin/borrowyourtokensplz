@@ -1,4 +1,19 @@
 <h1 id=top align="center">
+My modification adds LLM inference server detection.
+
+How to use it:
+
+sudo ./bin/xtate \
+  -ip 0.0.0.0/0 \
+  --exclude-file data/exclude.conf \
+  -p 11434,8000,8001,8002,1234,4891 \
+  -scan zbanner \
+  -probe llm-inference \
+  -rate 100000 \
+  -output text \
+  -output-file results/llm-scan.txt
+
+  
   <img src="screenshots/poster.jpg" alt="xtate" width="600px">
   <br>
 </h1>
