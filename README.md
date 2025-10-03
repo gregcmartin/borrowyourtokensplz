@@ -1,4 +1,4 @@
-<h1 id=top align="center">
+
 My modification adds LLM inference server detection.
 
 How to use it:
@@ -13,7 +13,7 @@ sudo ./bin/xtate \
   -output text \
   -output-file results/llm-scan.txt
 
-  
+  <h1 id=top align="center">
   <img src="screenshots/poster.jpg" alt="xtate" width="600px">
   <br>
 </h1>
